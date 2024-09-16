@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Decorators
   class Event
     attr_reader :event

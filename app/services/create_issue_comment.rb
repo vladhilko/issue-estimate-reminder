@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Services
   class CreateIssueComment
     def self.call(repo_full_name, issue_number, comment_body)
@@ -18,14 +20,14 @@ module Services
 
     attr_reader :repo_full_name, :issue_number, :comment_body
 
-    def github_client
-      private_pem = File.read(ENV['PRIVATE_KEY_PATH'])
+    def github_client # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+      private_pem = File.read(ENV.fetch('PRIVATE_KEY_PATH', nil))
       private_key = OpenSSL::PKey::RSA.new(private_pem)
 
       payload = {
         iat: Time.now.to_i,
         exp: Time.now.to_i + (10 * 60),
-        iss: ENV['APP_ID']
+        iss: ENV.fetch('APP_ID', nil)
       }
 
       jwt = JWT.encode(payload, private_key, 'RS256')

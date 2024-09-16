@@ -1,0 +1,14 @@
+require:
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+
+Style/Documentation:
+  Enabled: false
+RSpec/MessageSpies:
+  Enabled: false
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+RSpec/DescribeClass:
+  Enabled: false

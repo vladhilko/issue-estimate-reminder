@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ENV['RACK_ENV'] = 'test'
 
 require 'spec_helper'
@@ -38,12 +40,11 @@ RSpec.describe 'Issue Estimate Reminder App' do
 
   let(:secret) { 'test_secret' }
   let(:signature) do
-    'sha1=' + OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), secret, payload.to_json)
+    "sha1=#{OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), secret, payload.to_json)}"
   end
 
   before do
-    allow(ENV).to receive(:[]).and_call_original
-    allow(ENV).to receive(:[]).with('WEBHOOK_SECRET').and_return(secret)
+    allow(ENV).to receive(:fetch).with('WEBHOOK_SECRET', nil).and_return(secret)
     allow(Services::CreateIssueComment).to receive(:call)
   end
 

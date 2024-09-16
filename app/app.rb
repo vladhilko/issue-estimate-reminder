@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sinatra'
 require 'json'
 require 'openssl'
@@ -19,29 +21,26 @@ post '/' do
 
   event = Decorators::Event.new(JSON.parse(payload_body))
 
-  if request.env['HTTP_X_GITHUB_EVENT'] == 'issues' && event.issue_opened?
-    handle_issue_opened(event)
-  end
+  handle_issue_opened(event) if request.env['HTTP_X_GITHUB_EVENT'] == 'issues' && event.issue_opened?
 
   status 200
 end
 
 helpers do
   def verify_signature(payload_body, signature)
-    secret = ENV['WEBHOOK_SECRET']
-    sha1 = 'sha1=' + OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), secret, payload_body)
+    secret = ENV.fetch('WEBHOOK_SECRET', nil)
+    sha1 = "sha1=#{OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), secret, payload_body)}"
     halt 401, "Signatures didn't match!" unless Rack::Utils.secure_compare(sha1, signature)
   end
 
   def handle_issue_opened(event)
-    unless event.estimate_present?
-      post_comment(event)
-    end
+    return if event.estimate_present?
+
+    post_comment(event)
   end
 
   def post_comment(event)
     comment_body = "Please add an estimate to this issue in the format 'Estimate: X days'."
     Services::CreateIssueComment.call(event.repo_full_name, event.issue_number, comment_body)
   end
-
 end
