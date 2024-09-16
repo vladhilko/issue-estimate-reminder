@@ -7,6 +7,7 @@ require 'dotenv/load'
 require 'pry'
 
 require_relative 'decorators/event'
+require_relative 'services/create_issue_comment'
 
 set :port, 3000
 
@@ -16,8 +17,7 @@ post '/' do
 
   verify_signature(payload_body, request.env['HTTP_X_HUB_SIGNATURE'])
 
-  event_data = JSON.parse(payload_body)
-  event = Decorators::Event.new(event_data)
+  event = Decorators::Event.new(JSON.parse(payload_body))
 
   if request.env['HTTP_X_GITHUB_EVENT'] == 'issues' && event.issue_opened?
     handle_issue_opened(event)
@@ -35,35 +35,13 @@ helpers do
 
   def handle_issue_opened(event)
     unless event.estimate_present?
-      post_comment(event.repo_full_name, event.issue_number)
+      post_comment(event)
     end
   end
 
-  def post_comment(repo_full_name, issue_number)
-    client = github_client(repo_full_name)
+  def post_comment(event)
     comment_body = "Please add an estimate to this issue in the format 'Estimate: X days'."
-    client.add_comment(repo_full_name, issue_number, comment_body)
+    Services::CreateIssueComment.call(event.repo_full_name, event.issue_number, comment_body)
   end
 
-  def github_client(repo_full_name)
-    private_pem = File.read(ENV['PRIVATE_KEY_PATH'])
-    private_key = OpenSSL::PKey::RSA.new(private_pem)
-
-    payload = {
-      iat: Time.now.to_i,
-      exp: Time.now.to_i + (10 * 60),
-      iss: ENV['APP_ID']
-    }
-
-    jwt = JWT.encode(payload, private_key, 'RS256')
-
-    client = Octokit::Client.new(bearer_token: jwt)
-
-    installation = client.find_repository_installation(repo_full_name)
-    installation_id = installation.id
-
-    token = client.create_app_installation_access_token(installation_id)[:token]
-
-    Octokit::Client.new(access_token: token)
-  end
 end
