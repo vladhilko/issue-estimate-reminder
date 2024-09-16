@@ -7,4 +7,11 @@ gem 'dotenv'
 gem 'octokit'
 gem 'jwt'
 gem 'json'
-gem 'pry'
+
+group :development, :test do
+  gem 'rspec'
+end
+
+group :development do
+  gem 'pry'
+end

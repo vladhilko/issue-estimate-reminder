@@ -10,6 +10,14 @@
 
 The application requires Ruby version **3.3.0**. Please ensure you have this version installed before proceeding.
 
+## Testing
+
+To run the test suite, execute:
+
+```bash
+bundle exec rspec
+```
+
 ## Initial Setup
 
 Note: Ensure that you have completed Step 1 and Step 2 before proceeding. This includes creating the GitHub App, setting up the webhook URL, and generating the necessary credentials.

@@ -6,6 +6,8 @@ require 'octokit'
 require 'dotenv/load'
 require 'pry'
 
+require_relative 'decorators/event'
+
 set :port, 3000
 
 post '/' do
@@ -14,9 +16,10 @@ post '/' do
 
   verify_signature(payload_body, request.env['HTTP_X_HUB_SIGNATURE'])
 
-  event = JSON.parse(payload_body)
+  event_data = JSON.parse(payload_body)
+  event = Decorators::Event.new(event_data)
 
-  if request.env['HTTP_X_GITHUB_EVENT'] == 'issues' && event['action'] == 'opened'
+  if request.env['HTTP_X_GITHUB_EVENT'] == 'issues' && event.issue_opened?
     handle_issue_opened(event)
   end
 
@@ -31,12 +34,8 @@ helpers do
   end
 
   def handle_issue_opened(event)
-    issue_body = event['issue']['body'] || ''
-    issue_number = event['issue']['number']
-    repo_full_name = event['repository']['full_name']
-
-    unless issue_body.match?(/Estimate:\s*\d+\s*days/i)
-      post_comment(repo_full_name, issue_number)
+    unless event.estimate_present?
+      post_comment(event.repo_full_name, event.issue_number)
     end
   end
 
