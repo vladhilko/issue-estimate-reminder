@@ -1,3 +1,64 @@
+# README
+
+## Screen Recording
+
+![Application Demo](./screenrecords/screen-recording.gif)
+
+## Prerequisites
+
+- **Ruby 3.3.0**
+
+The application requires Ruby version **3.3.0**. Please ensure you have this version installed before proceeding.
+
+## Initial Setup
+
+Note: Ensure that you have completed Step 1 and Step 2 before proceeding. This includes creating the GitHub App, setting up the webhook URL, and generating the necessary credentials.
+
+Clone the repository and set up the application.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/vladhilko/issue-estimate-reminder.git
+cd issue-estimate-reminder
+```
+
+### 2. Install Dependencies
+
+```bash
+bundle install
+```
+
+### 3. Add Environment Variables and Private Key
+
+Copy your environment variables and private key from Step 1 into the project directory.
+
+- Create a `.env` File:
+  - In the root of the project directory, create a file named .env and add the following content:
+  ```bash
+  APP_ID=your_app_id
+  WEBHOOK_SECRET=your_webhook_secret
+  PRIVATE_KEY_PATH=./private-key.pem
+  ```
+  - Replace your_app_id and your_webhook_secret with the actual values obtained in Step 1.
+- Place Your Private Key:
+  - Copy the private-key.pem file downloaded in Step 1 into the root of the project directory.
+
+### 4. Run the Application
+
+Start the Smee client and the application to begin receiving webhook events.
+
+- Run the Smee Client:
+  - Replace https://smee.io/your-unique-channel with your actual Smee.io URL from Step 1.
+  ```bash
+  smee --url https://smee.io/your-unique-channel --target http://127.0.0.1:3000/
+  ```
+- Run the Application:
+  - In a new terminal window, start the Sinatra application:
+  ```bash
+  ruby app/app.rb
+  ```
+
 ## Step 1: Create a GitHub App
 
 ### 1. Access GitHub Developer Settings
@@ -33,10 +94,15 @@
     ```
 
 - **Webhook URL:**
-  - Use the Smee.io URL generated in Step 2. Example:
-    ```
-    https://smee.io/your-unique-channel
-    ```
+
+Generate a Webhook Proxy URL with Smee.io
+
+- Visit Smee.io
+  - Open https://smee.io/ in your browser.
+- Create a New Channel
+  - Click on "Start a new channel".
+  - A unique URL will be generated, e.g., https://smee.io/your-unique-channel.
+  - Copy this URL.
   - Paste it into the **"Webhook URL"** field.
 
 - **Webhook Secret:**
